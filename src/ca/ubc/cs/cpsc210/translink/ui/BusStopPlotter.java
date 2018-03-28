@@ -8,11 +8,15 @@ import android.location.Location;
 import ca.ubc.cs.cpsc210.translink.BusesAreUs;
 import ca.ubc.cs.cpsc210.translink.R;
 import ca.ubc.cs.cpsc210.translink.model.Stop;
+import ca.ubc.cs.cpsc210.translink.model.StopManager;
+import ca.ubc.cs.cpsc210.translink.util.Geometry;
+import ca.ubc.cs.cpsc210.translink.util.LatLon;
 import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer;
 import org.osmdroid.bonuspack.overlays.Marker;
 import org.osmdroid.views.MapView;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 // A plotter for bus stop locations
@@ -51,12 +55,44 @@ public class BusStopPlotter extends MapViewOverlay {
     }
 
     /**
-     * Mark all visible stops in stop manager onto map.
+     * mark all visible stops in stop manager onto map.
      */
     public void markStops(Location currentLocation) {
         Drawable stopIconDrawable = activity.getResources().getDrawable(R.drawable.stop_icon);
 
-        // TODO: complete the implementation of this method (Task 5)
+        updateVisibleArea();
+        newStopClusterer();
+        Iterator<Stop> stopIterator = StopManager.getInstance().iterator();
+
+        while (stopIterator.hasNext()) {
+            Stop nextStop = stopIterator.next();
+            LatLon ll = nextStop.getLocn();
+            updateInfo(nextStop, stopIconDrawable);
+
+            if (currentLocation != null) {
+                Stop nearestPoint = StopManager.getInstance()
+                        .findNearestTo(new LatLon(currentLocation.getLatitude(), currentLocation.getLongitude()));
+                updateMarkerOfNearest(nearestPoint);
+            }
+        }
+
+        updateVisibleArea();
+    }
+
+    private void updateInfo(Stop nextStop, Drawable stopIconDrawable) {
+        if (Geometry.rectangleContainsPoint(super.northWest, super.southEast, nextStop.getLocn())
+                && !stopMarkerMap.containsKey(nextStop)) {
+            Marker marker = new Marker(mapView);
+
+            marker.setIcon(stopIconDrawable);
+            marker.setPosition(Geometry.gpFromLatLon(nextStop.getLocn()));
+            marker.setInfoWindow(stopInfoWindow);
+            marker.setRelatedObject(nextStop);
+            marker.setTitle(nextStop.getNumber() + " " + nextStop.getName());
+
+            setMarker(nextStop, marker);
+            stopClusterer.add(marker);
+        }
     }
 
     /**
@@ -87,7 +123,17 @@ public class BusStopPlotter extends MapViewOverlay {
         Drawable stopIconDrawable = activity.getResources().getDrawable(R.drawable.stop_icon);
         Drawable closestStopIconDrawable = activity.getResources().getDrawable(R.drawable.closest_stop_icon);
 
-        // TODO: complete the implementation of this method (Task 6)
+        if (nearestStnMarker != null) {
+            nearestStnMarker.setIcon(stopIconDrawable);
+        }
+        if (nearest != null) {
+            nearestStnMarker = getMarker(nearest);
+            if (nearestStnMarker != null) {
+                nearestStnMarker = getMarker(nearest);
+                nearestStnMarker.setIcon(closestStopIconDrawable);
+            }
+        }
+        updateVisibleArea();
     }
 
     /**

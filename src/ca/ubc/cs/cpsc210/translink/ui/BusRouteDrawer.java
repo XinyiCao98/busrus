@@ -1,10 +1,17 @@
 package ca.ubc.cs.cpsc210.translink.ui;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import ca.ubc.cs.cpsc210.translink.BusesAreUs;
+import ca.ubc.cs.cpsc210.translink.model.Route;
+import ca.ubc.cs.cpsc210.translink.model.RoutePattern;
+import ca.ubc.cs.cpsc210.translink.model.Stop;
+import ca.ubc.cs.cpsc210.translink.model.StopManager;
+import ca.ubc.cs.cpsc210.translink.util.LatLon;
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.bonuspack.overlays.Polyline;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
 import java.util.ArrayList;
@@ -38,8 +45,41 @@ public class BusRouteDrawer extends MapViewOverlay {
      * Plot each visible segment of each route pattern of each route going through the selected stop.
      */
     public void plotRoutes(int zoomLevel) {
-        //TODO: complete the implementation of this method (Task 7)
+        busRouteLegendOverlay.clear();
+        busRouteOverlays.clear();
+        Stop selectedStop = StopManager.getInstance().getSelected();
+        updateVisibleArea();
+        float width = getLineWidth(zoomLevel);
+
+        if (selectedStop != null) {
+
+            for (Route route : selectedStop.getRoutes()) {
+                busRouteLegendOverlay.draw(new Canvas(), mapView, false);
+                busRouteLegendOverlay.add(route.getNumber());
+                polylineDrawer(zoomLevel,route);
+            }
+        }
     }
+
+
+    private void polylineDrawer(int zoomLevel, Route route) {
+        for (RoutePattern routePattern : route.getPatterns()) {
+            List<LatLon> path = routePattern.getPath();
+            for (int i = 0; i < path.size() - 1; i++) {
+                Polyline polyline = new Polyline(mapView.getContext());
+                polyline.setWidth(getLineWidth(zoomLevel));
+                polyline.setColor(busRouteLegendOverlay.getColor(route.getNumber()));
+
+                List<GeoPoint> points = new ArrayList<>();
+                points.add(new GeoPoint(path.get(i).getLatitude(), path.get(i).getLongitude()));
+                points.add(new GeoPoint(path.get(i + 1).getLatitude(), path.get(i + 1).getLongitude()));
+                polyline.setPoints(points);
+                busRouteOverlays.add(polyline);
+            }
+
+        }
+    }
+
 
     public List<Polyline> getBusRouteOverlays() {
         return Collections.unmodifiableList(busRouteOverlays);

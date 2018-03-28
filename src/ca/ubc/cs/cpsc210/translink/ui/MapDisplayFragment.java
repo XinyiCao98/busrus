@@ -11,10 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import ca.ubc.cs.cpsc210.translink.R;
+import ca.ubc.cs.cpsc210.translink.model.Stop;
 import ca.ubc.cs.cpsc210.translink.model.StopManager;
 import ca.ubc.cs.cpsc210.translink.parsers.RouteMapParser;
 import ca.ubc.cs.cpsc210.translink.parsers.StopParser;
 import ca.ubc.cs.cpsc210.translink.parsers.exception.StopDataMissingException;
+import ca.ubc.cs.cpsc210.translink.util.LatLon;
 import org.json.JSONException;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.bonuspack.overlays.MapEventsOverlay;
@@ -282,7 +284,8 @@ public class MapDisplayFragment extends Fragment implements MapEventsReceiver, I
 
     /**
      * Centers map at given GeoPoint
-     * @param center  point at which map is to be centred
+     *
+     * @param center point at which map is to be centred
      */
     private void centerAt(final GeoPoint center) {
         mapView.getViewTreeObserver().addOnGlobalLayoutListener(new MapGlobalDisplayListener(center));
@@ -295,8 +298,11 @@ public class MapDisplayFragment extends Fragment implements MapEventsReceiver, I
      * @param location the location of the user
      */
     private void handleLocationChange(Location location) {
-        // TODO: complete the implementation of this method (Task 6)
-
+        currentLocation = location;
+        LatLon latLon = new LatLon(currentLocation.getLatitude(), currentLocation.getLongitude());
+        Stop nearest = stopManager.findNearestTo(latLon);
+        busStopPlotter.updateMarkerOfNearest(nearest);
+        locationListener.onLocationChanged(nearest,latLon);
     }
 
     /**
@@ -316,7 +322,7 @@ public class MapDisplayFragment extends Fragment implements MapEventsReceiver, I
     /**
      * Called when user's location has changed - handle location change and repaint map
      *
-     * @param location            user's location
+     * @param location           user's location
      * @param myLocationProvider location provider
      */
     @Override

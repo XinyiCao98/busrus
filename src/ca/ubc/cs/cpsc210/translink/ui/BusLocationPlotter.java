@@ -2,13 +2,17 @@ package ca.ubc.cs.cpsc210.translink.ui;
 
 import android.content.Context;
 import ca.ubc.cs.cpsc210.translink.R;
+import ca.ubc.cs.cpsc210.translink.model.Bus;
+import ca.ubc.cs.cpsc210.translink.model.StopManager;
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 // A plotter for bus locations
 public class BusLocationPlotter extends MapViewOverlay {
@@ -36,7 +40,16 @@ public class BusLocationPlotter extends MapViewOverlay {
      * Plot buses serving selected stop
      */
     public void plotBuses() {
-        // TODO: complete the implementation of this method (Task 10)
+        busLocationsOverlay.removeAllItems();
+        if (StopManager.getInstance().getSelected() != null) {
+            List<Bus> buses = StopManager.getInstance().getSelected().getBuses();
+            for (Bus next : buses) {
+                GeoPoint point = new GeoPoint(next.getLatLon().getLatitude(), next.getLatLon().getLongitude());
+                OverlayItem bus = new OverlayItem(next.getRoute().getName(), next.getDestination(), point);
+                busLocationsOverlay.addItem(bus);
+            }
+        }
+        mapView.invalidate();
     }
 
     /**
