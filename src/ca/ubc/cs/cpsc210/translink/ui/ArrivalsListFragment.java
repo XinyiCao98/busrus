@@ -39,7 +39,7 @@ public class ArrivalsListFragment extends ListFragment {
     private ArrayList<Arrival> getArrivalsForSelectedStop() {
         Stop selectedStop = StopManager.getInstance().getSelected();
         ArrayList<Arrival> arrivals = new ArrayList<>();
-        for (Arrival next: selectedStop) {
+        for (Arrival next : selectedStop) {
             arrivals.add(next);
         }
         return arrivals;
@@ -71,8 +71,9 @@ public class ArrivalsListFragment extends ListFragment {
 
         /**
          * Set view of text field that displays wait time
-         * @param convertView  the text view
-         * @param arrival  the arrival to be displayed
+         *
+         * @param convertView the text view
+         * @param arrival     the arrival to be displayed
          */
         private void setWaitTimeTextView(View convertView, Arrival arrival) {
             TextView waitTime = (TextView) convertView.findViewById(R.id.wait_time);
