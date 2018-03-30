@@ -98,7 +98,7 @@ public class BusStopPlotter extends MapViewOverlay {
 
     private StringBuilder getRouteNo(Stop stop) {
         StringBuilder routeNo = new StringBuilder();
-        for (Route route: stop.getRoutes()) {
+        for (Route route : stop.getRoutes()) {
             routeNo.append("\r\n" + route.getNumber());
         }
         return routeNo;
