@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import ca.ubc.cs.cpsc210.translink.BusesAreUs;
 import ca.ubc.cs.cpsc210.translink.R;
+import ca.ubc.cs.cpsc210.translink.model.Route;
 import ca.ubc.cs.cpsc210.translink.model.Stop;
 import ca.ubc.cs.cpsc210.translink.model.StopManager;
 import ca.ubc.cs.cpsc210.translink.util.Geometry;
@@ -88,12 +89,27 @@ public class BusStopPlotter extends MapViewOverlay {
             marker.setPosition(Geometry.gpFromLatLon(nextStop.getLocn()));
             marker.setInfoWindow(stopInfoWindow);
             marker.setRelatedObject(nextStop);
-            marker.setTitle(nextStop.getNumber() + " " + nextStop.getName());
+            marker.setTitle(nextStop.getNumber() + " " + nextStop.getName() + getRouteNo(nextStop));
 
             setMarker(nextStop, marker);
             stopClusterer.add(marker);
         }
     }
+
+    private StringBuilder getRouteNo(Stop stop) {
+        StringBuilder routeNo = new StringBuilder();
+        for (Route route: stop.getRoutes()) {
+            routeNo.append("\r\n" + route.getNumber());
+        }
+        return routeNo;
+    }
+
+//    public void updateRout(Stop stop, Marker marker, LatLon latLon) {
+//        String routes = stop.getNumber() + stop.getName() + "\n";
+//        for (Route route: stop.getRoutes()) {
+//            routes += "route" + route.getNumber() + "\n";
+//        }
+//    }
 
     /**
      * Create a new stop cluster object used to group stops that are close by to reduce screen clutter
